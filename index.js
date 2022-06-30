@@ -40,6 +40,27 @@ async function run() {
 
         })
 
+        app.get('/api/update-billing/:id', async (req, res) => {
+            const id = req.params.id
+            const q = { _id: ObjectId(id) }
+            const bill = await billingsCollection.findOne(q)
+            res.send(bill)
+        })
+
+        app.put('/api/update-billing/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const update = req.body
+            const updateDoc = {
+                $set: update,
+            };
+
+            const result = await billingsCollection.updateOne(filter, updateDoc, options);
+
+            res.send(result)
+        })
+
 
 
     }
@@ -57,5 +78,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`Listening on port ${port}`)
 })
