@@ -32,6 +32,14 @@ async function run() {
             res.send({ blling, count })
         })
 
+        app.post('/api/add-billing', async (req, res) => {
+            const newDoc = req.body
+            const result = await billingsCollection.insertOne(newDoc)
+
+            res.send(result)
+
+        })
+
 
 
     }
