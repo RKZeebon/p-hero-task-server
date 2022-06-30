@@ -24,9 +24,12 @@ async function run() {
 
 
         app.get('/api/billing-list', async (req, res) => {
-            const blings = await (await billingsCollection.find().toArray()).reverse()
-
-            res.send(blings)
+            const count = await billingsCollection.estimatedDocumentCount()
+            const page = parseInt(req.query.page)
+            const skip = page * 10
+            const reverseBlling = await (await billingsCollection.find().toArray()).reverse()
+            const blling = reverseBlling.splice(skip, 10)
+            res.send({ blling, count })
         })
 
 
