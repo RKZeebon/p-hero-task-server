@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const bcrypt = require(('bcrypt'))
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -21,6 +22,43 @@ async function run() {
     try {
         await client.connect();
         const billingsCollection = client.db('p-hero').collection('bllings')
+        const usersCollection = client.db('p-hero').collection('users')
+
+        app.post('/api/registration', async (req, res) => {
+            const query = req.body.email
+            const existingUser = await usersCollection.findOne({ email: query })
+            if (existingUser) {
+                res.send('User Exist')
+            }
+            else {
+                const hashedPass = await bcrypt.hash(req.body.pass, 10)
+                const user = { name: req.body.name, email: req.body.email, pass: hashedPass }
+                const result = await usersCollection.insertOne(user)
+
+                res.send(result)
+            }
+        })
+
+        app.post('/api/login', async (req, res) => {
+            const query = req.body.email
+            const user = await usersCollection.findOne({ email: query })
+            console.log(query);
+            console.log(user);
+
+            if (user) {
+                const matchedUser = await bcrypt.compare(req.body.pass, user.pass)
+                if (matchedUser) {
+                    res.send("Success")
+                }
+                else if (!matchedUser) {
+                    res.send("Access denied")
+                }
+
+            }
+            else {
+                res.status(400).send('Sorry, we cant find you')
+            }
+        })
 
 
         app.get('/api/billing-list', async (req, res) => {
