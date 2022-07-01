@@ -41,10 +41,14 @@ async function run() {
                 const blling = reverseBlling.splice(skip, 10)
                 res.send({ blling, count })
             }
-            else {
+            else if (page >= 0) {
                 const reverseBlling = await (await billingsCollection.find().toArray()).reverse()
                 const blling = reverseBlling.splice(skip, 10)
                 res.send({ blling, count })
+            }
+            else {
+                const blling = await billingsCollection.find().toArray()
+                res.send(blling)
             }
         })
 
