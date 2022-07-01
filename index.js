@@ -27,10 +27,27 @@ async function run() {
             const count = await billingsCollection.estimatedDocumentCount()
             const page = parseInt(req.query.page)
             const skip = page * 10
-            const reverseBlling = await (await billingsCollection.find().toArray()).reverse()
-            const blling = reverseBlling.splice(skip, 10)
-            res.send({ blling, count })
+            const search = req.query.query
+            if (search) {
+                const reverseBlling = await (await billingsCollection.find(
+                    {
+                        "$or": [
+                            { name: { $regex: search, $options: "i" } },
+                            { email: { $regex: search, $options: "i" } },
+                            { phone: { $regex: search, $options: "i" } }
+                        ]
+                    }
+                ).toArray()).reverse()
+                const blling = reverseBlling.splice(skip, 10)
+                res.send({ blling, count })
+            }
+            else {
+                const reverseBlling = await (await billingsCollection.find().toArray()).reverse()
+                const blling = reverseBlling.splice(skip, 10)
+                res.send({ blling, count })
+            }
         })
+
 
         app.post('/api/add-billing', async (req, res) => {
             const newDoc = req.body
